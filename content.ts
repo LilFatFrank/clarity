@@ -43,9 +43,13 @@ const STYLE = `
     0 0 0 6px rgba(26,115,232,.75);
 }
 
-/* Popup + card etc. (unchanged) */
-.vizor-popup { position: fixed; right: 18px; bottom: 70px; z-index: 2147483647; }
-.vizor-hidden { display: none; }
+/* Popup + card etc. */
+.vizor-popup { 
+  position: fixed; 
+  right: 18px; 
+  bottom: 70px; 
+  z-index: 2147483647;
+}
 .vizor-card {
   width: 420px; max-height: 72vh; overflow:auto;
   background:#fff; color:#111; border-radius:14px; padding:16px 16px 10px;
@@ -53,8 +57,11 @@ const STYLE = `
   font: 14px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial;
 }
 .vizor-card h3 { margin: 0 0 8px; font-size: 16px; }
-.vizor-close { position: absolute; right: 28px; margin-top: -4px; cursor: pointer; font-size: 18px; }
-.vizor-body { white-space: pre-wrap; }
+.vizor-close { position: absolute; right: 16px; margin-top: -4px; cursor: pointer; font-size: 18px; }
+.vizor-body { 
+  white-space: pre-wrap; 
+  padding-right: 24px; /* Add right padding to prevent text overlap with close button */
+}
 .vizor-loading { display:flex; align-items:center; gap:10px; }
 .vizor-spinner {
   width:16px; height:16px; border-radius:50%;
@@ -88,6 +95,7 @@ function getSignature(url = location.href): string | null {
 
 // ---------- UI State ----------
 let popup: HTMLDivElement | null = null;
+let overlay: HTMLDivElement | null = null;
 let bodyEl: HTMLDivElement | null = null;
 let btn: HTMLImageElement | null = null;
 
@@ -97,8 +105,34 @@ let currentResponse: string | null = null;
 
 function ensurePopup() {
   if (popup) return;
+  
+  // Create overlay with very light background
+  overlay = document.createElement("div");
+  overlay.className = "vizor-overlay";
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    z-index: 2147483646;
+    opacity: 0;
+    pointer-events: none;
+  `;
+  document.documentElement.appendChild(overlay);
+  
+  // Create popup with inline styles
   popup = document.createElement("div");
-  popup.className = "vizor-popup vizor-hidden";
+  popup.className = "vizor-popup";
+  popup.style.cssText = `
+    position: fixed;
+    right: 18px;
+    bottom: 70px;
+    z-index: 2147483647;
+    opacity: 0;
+    pointer-events: none;
+  `;
   popup.innerHTML = `
     <div class="vizor-card">
       <div class="vizor-close" title="Close">×</div>
@@ -109,22 +143,40 @@ function ensurePopup() {
 
   bodyEl = popup.querySelector(".vizor-body") as HTMLDivElement;
   const close = popup.querySelector(".vizor-close") as HTMLDivElement;
-  close.onclick = () => popup!.classList.add("vizor-hidden");
+  close.onclick = () => hidePopup();
+  
+  // Close on overlay click
+  overlay.onclick = () => hidePopup();
 
   document.addEventListener("keydown", (e) => {
     if (
       e.key === "Escape" &&
       popup &&
-      !popup.classList.contains("vizor-hidden")
+      popup.style.opacity !== "0"
     ) {
-      popup.classList.add("vizor-hidden");
+      hidePopup();
     }
   });
 }
 
 function showPopup() {
   ensurePopup();
-  popup!.classList.remove("vizor-hidden");
+  
+  overlay!.style.opacity = "1";
+  overlay!.style.pointerEvents = "auto";
+  popup!.style.opacity = "1";
+  popup!.style.pointerEvents = "auto";
+}
+
+function hidePopup() {
+  if (overlay) {
+    overlay.style.opacity = "0";
+    overlay.style.pointerEvents = "none";
+  }
+  if (popup) {
+    popup.style.opacity = "0";
+    popup.style.pointerEvents = "none";
+  }
 }
 
 function setLoading(msg = "Explaining transaction…") {
@@ -149,7 +201,7 @@ function injectButton() {
   btn = document.createElement("img");
   btn.id = "vizor-btn";
   btn.className = "vizor-floating"; // Always keep the pulse
-  btn.src = chrome.runtime.getURL("icons/vizor-icon-128.png");
+  btn.src = chrome.runtime.getURL("icons/vizor-logo.png");
   btn.alt = "Explain TX";
   btn.tabIndex = 0; // keyboard focusable
 
@@ -173,6 +225,14 @@ function removeButton() {
     btn.remove();
     btn = null;
   }
+  if (overlay) {
+    overlay.remove();
+    overlay = null;
+  }
+  if (popup) {
+    popup.remove();
+    popup = null;
+  }
 }
 
 function clearState() {
@@ -191,7 +251,7 @@ function handleUrlChange(url: string) {
     removeButton();
     clearState();
     if (popup && !popup.classList.contains("vizor-hidden")) {
-      popup.classList.add("vizor-hidden");
+      hidePopup();
     }
   }
 }
