@@ -1,5 +1,4 @@
 // background.ts
-
 const SOLSCAN_HOST = "solscan.io";
 
 function notify(tabId: number, url?: string) {
@@ -58,38 +57,75 @@ function buildDisplayText(d: any): string {
 }
 
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
-  if (msg?.type !== "EXPLAIN_TX") return; // not for us
+  if (msg?.type === "EXPLAIN_TX") {
+    (async () => {
+      try {
+        const signature = String(msg.signature || "");
+        const tz =
+          String(msg.tz || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
 
-  (async () => {
-    try {
-      const signature = String(msg.signature || "");
-      const tz =
-        String(msg.tz || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
+        if (!signature) {
+          sendResponse({ ok: false, error: "Missing signature" });
+          return;
+        }
 
-      if (!signature) {
-        sendResponse({ ok: false, error: "Missing signature" });
-        return;
+        const resp = await fetch("http://localhost:3001/api/transactions/explain", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ signature, tz }),
+        });
+
+        if (!resp.ok) {
+          sendResponse({ ok: false, error: `API ${resp.status}` });
+          return;
+        }
+
+        const data = await resp.json();
+        const text = buildDisplayText(data);
+        sendResponse({ ok: true, text });
+      } catch (e: any) {
+        sendResponse({ ok: false, error: e?.message || String(e) });
       }
+    })();
 
-      const resp = await fetch("http://localhost:3001/api/transactions/explain", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ signature, tz }),
-      });
+    // Keep the message channel open for the async work above.
+    return true;
+  }
 
-      if (!resp.ok) {
-        sendResponse({ ok: false, error: `API ${resp.status}` });
-        return;
+  if (msg?.type === "EXPLAIN_ACCOUNT") {
+    (async () => {
+      try {
+        const address = String(msg.address || "");
+        const tz =
+          String(msg.tz || Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC");
+
+        if (!address) {
+          sendResponse({ ok: false, error: "Missing address" });
+          return;
+        }
+
+        const resp = await fetch("http://localhost:3001/api/wallets/insights", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ address, tz }),
+        });
+
+        if (!resp.ok) {
+          sendResponse({ ok: false, error: `API ${resp.status}` });
+          return;
+        }
+
+        const data = await resp.json();
+        console.log("Account insights response:", data);
+        sendResponse({ ok: true, data });
+      } catch (e: any) {
+        sendResponse({ ok: false, error: e?.message || String(e) });
       }
+    })();
 
-      const data = await resp.json();
-      const text = buildDisplayText(data);
-      sendResponse({ ok: true, text });
-    } catch (e: any) {
-      sendResponse({ ok: false, error: e?.message || String(e) });
-    }
-  })();
+    // Keep the message channel open for the async work above.
+    return true;
+  }
 
-  // Keep the message channel open for the async work above.
-  return true;
+  return false; // Not handled
 });
