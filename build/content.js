@@ -1,4 +1,4 @@
-console.log("[vizor] content script loaded on",location.href);const S=`
+console.log("[vizor] content script loaded on",location.href);const k=`
 .vizor-floating {
   position: fixed;
   right: 18px;
@@ -62,7 +62,7 @@ console.log("[vizor] content script loaded on",location.href);const S=`
   font-size: 11px;
   color: #666;
   margin-bottom: 12px;
-  text-align: center;
+  text-align: left;
   font-weight: 500;
 }
 
@@ -74,13 +74,20 @@ console.log("[vizor] content script loaded on",location.href);const S=`
   border-bottom: 1px solid #f0f0f0;
 }
 
+.vizor-active-hours {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+}
+
 .vizor-metric:last-child {
   border-bottom: none;
 }
 
 .vizor-metric-label {
-  color: #555;
-  font-weight: 500;
+  color: #333;
+  font-weight: 600;
 }
 
 .vizor-metric-value {
@@ -105,95 +112,118 @@ console.log("[vizor] content script loaded on",location.href);const S=`
 }
 
 .vizor-transaction-types {
-  display: flex;
-  gap: 8px;
-  margin: 8px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.vizor-type-badge {
-  flex: 1;
-  text-align: center;
-  padding: 6px 4px;
+.vizor-transaction-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.vizor-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 4px;
+  margin-top: 2px;
+}
+
+.vizor-type-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.vizor-percentage-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #333;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.vizor-top-programs {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.vizor-program-badge {
+  display: inline-block;
+  background: #5062EE;
+  color: white;
+  padding: 6px 10px;
   border-radius: 8px;
   font-size: 11px;
   font-weight: 600;
-}
-
-.vizor-type-swap {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-  color: white;
-}
-
-.vizor-type-transfer {
-  background: linear-gradient(135deg, #4ecdc4, #44a08d);
-  color: white;
-}
-
-.vizor-type-other {
-  background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
-  color: #2c3e50;
-}
-
-.vizor-top-program {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  margin: 8px 0;
-  text-align: center;
-  font-weight: 600;
-  position: relative;
-}
-
-.vizor-program-percentage {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #ff6b6b;
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  border: 2px solid white;
-}
-
-.vizor-unique-addresses {
-  background: linear-gradient(135deg, #ffeaa7, #fab1a0);
-  color: #2d3436;
-  padding: 8px 12px;
-  border-radius: 10px;
-  text-align: center;
-  font-weight: 600;
-  margin: 8px 0;
-}
-
-.vizor-active-hours {
-  background: linear-gradient(135deg, #74b9ff, #0984e3);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  text-align: center;
-  font-weight: 600;
-  margin: 8px 0;
-  position: relative;
+  margin: 0px 4px 0px 0;
 }
 
 .vizor-timezone-note {
   font-size: 10px;
-  color: rgba(255,255,255,0.8);
+  color: #666;
   font-weight: 400;
-  margin-top: 2px;
+}
+
+.vizor-collapsible {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.vizor-collapsible:hover {
+  background-color: #f8f9fa;
+}
+
+.vizor-counterparties-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  border-radius: 6px;
+}
+
+.vizor-counterparties-list.expanded {
+  max-height: 200px;
+}
+
+.vizor-counterparty-item {
+  padding: 2px;
+  font-size: 11px;
+}
+
+.vizor-counterparty-item:last-child {
+  border-bottom: none;
+}
+
+.vizor-counterparty-address {
+  color: #5062EE;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.vizor-counterparty-address:hover {
+  text-decoration: underline;
+}
+
+.vizor-counterparty-stats {
+  color: #666;
+  font-size: 10px;
 }
 .vizor-card h3 { margin: 0 0 8px; font-size: 16px; }
 .vizor-close { position: absolute; right: 16px; margin-top: -4px; cursor: pointer; font-size: 18px; }
 .vizor-body { 
-  white-space: pre-wrap; 
+  white-space: normal; 
   padding-right: 24px; /* Add right padding to prevent text overlap with close button */
+}
+.vizor-body.is-pre {
+  white-space: pre-wrap;
 }
 .vizor-loading { display:flex; align-items:center; gap:10px; }
 .vizor-spinner {
@@ -201,7 +231,7 @@ console.log("[vizor] content script loaded on",location.href);const S=`
   border:2px solid #ddd; border-top-color:#111; animation: vizor-spin 0.8s linear infinite;
 }
 @keyframes vizor-spin { to { transform: rotate(360deg); } }
-`;function T(){if(document.getElementById("vizor-style"))return;const e=document.createElement("style");e.id="vizor-style",e.textContent=S,document.documentElement.appendChild(e)}const x=(e=location.href)=>/:\/\/(?:www\.)?solscan\.io\/tx\//i.test(e),h=(e=location.href)=>/:\/\/(?:www\.)?solscan\.io\/account\//i.test(e),P=(e=location.href)=>x(e)||h(e);function L(e=location.href){try{const o=new URL(e).pathname.split("/").filter(Boolean),l=o.indexOf("tx");return l>=0&&o[l+1]?o[l+1]:null}catch{return null}}function A(e=location.href){try{const o=new URL(e).pathname.split("/").filter(Boolean),l=o.indexOf("account");return l>=0&&o[l+1]?o[l+1]:null}catch{return null}}let i=null,n=null,c=null,r=null,v="",d=null,p=null,a=null;function m(){if(i)return;n=document.createElement("div"),n.className="vizor-overlay",n.style.cssText=`
+`;function L(){if(document.getElementById("vizor-style"))return;const e=document.createElement("style");e.id="vizor-style",e.textContent=k,document.documentElement.appendChild(e)}const z=(e=location.href)=>/:\/\/(?:www\.)?solscan\.io\/tx\//i.test(e),y=(e=location.href)=>/:\/\/(?:www\.)?solscan\.io\/account\//i.test(e),S=(e=location.href)=>z(e)||y(e);function T(e=location.href){try{const o=new URL(e).pathname.split("/").filter(Boolean),p=o.indexOf("tx");return p>=0&&o[p+1]?o[p+1]:null}catch{return null}}function A(e=location.href){try{const o=new URL(e).pathname.split("/").filter(Boolean),p=o.indexOf("account");return p>=0&&o[p+1]?o[p+1]:null}catch{return null}}let i=null,n=null,r=null,s=null,h="",d=null,v=null,a=null;function b(){if(i)return;n=document.createElement("div"),n.className="vizor-overlay",n.style.cssText=`
     position: fixed;
     top: 0;
     left: 0;
@@ -223,49 +253,69 @@ console.log("[vizor] content script loaded on",location.href);const S=`
       <div class="vizor-close" title="Close">×</div>
       <div class="vizor-body">Ready.</div>
     </div>
-  `,document.documentElement.appendChild(i),c=i.querySelector(".vizor-body");const e=i.querySelector(".vizor-close");e.onclick=()=>u(),n.onclick=()=>u(),document.addEventListener("keydown",t=>{t.key==="Escape"&&i&&i.style.opacity!=="0"&&u()})}function C(){m(),n.style.opacity="1",n.style.pointerEvents="auto",i.style.opacity="1",i.style.pointerEvents="auto"}function u(){n&&(n.style.opacity="0",n.style.pointerEvents="none"),i&&(i.style.opacity="0",i.style.pointerEvents="none")}function z(e="Explaining transaction…"){c&&(c.innerHTML=`
+  `,document.documentElement.appendChild(i),r=i.querySelector(".vizor-body");const e=i.querySelector(".vizor-close");e.onclick=()=>u(),n.onclick=()=>u(),document.addEventListener("keydown",t=>{t.key==="Escape"&&i&&i.style.opacity!=="0"&&u()})}function P(){b(),n.style.opacity="1",n.style.pointerEvents="auto",i.style.opacity="1",i.style.pointerEvents="auto"}function u(){n&&(n.style.opacity="0",n.style.pointerEvents="none"),i&&(i.style.opacity="0",i.style.pointerEvents="none")}function w(e="Explaining transaction…"){r&&(r.classList.add("is-pre"),r.innerHTML=`
     <div class="vizor-loading">
       <div class="vizor-spinner"></div>
       <div>${e}</div>
     </div>
-  `)}function s(e){c&&(c.textContent=e)}function f(e){if(!c&&(console.error("bodyEl is null, ensuring popup is created"),m(),c=i?.querySelector(".vizor-body"),!c)){console.error("Still no bodyEl after ensuring popup");return}if(console.log("Rendering wallet insights with data:",e,e.insights),!e||!e.insights){console.error("Invalid data structure:",e),s("Invalid data received from server.");return}const t=e.insights,o=t.totalTx,l=t.fee.totalSol,y=Math.round(t.successRate*100),w=t.topPrograms[0],E=Math.round(t.topProgramShare*100),k=o>=100?`over ${Math.floor(o/100)*100} transactions`:`${o} transactions`;c.innerHTML=`
+  `)}function l(e){r&&(r.classList.add("is-pre"),r.textContent=e)}function m(e){if(!r&&(console.error("bodyEl is null, ensuring popup is created"),b(),r=i?.querySelector(".vizor-body"),!r)){console.error("Still no bodyEl after ensuring popup");return}if(r.classList.remove("is-pre"),console.log("Rendering wallet insights with data:",e,e.insights),!e||!e.insights){console.error("Invalid data structure:",e),l("Invalid data received from server.");return}const t=e.insights,o=t.fee.totalSol,p=t.topPrograms.slice(0,3);r.innerHTML=`
     <div class="vizor-insights">
-      <div class="vizor-insights-header">${k}</div>
+      <div class="vizor-insights-header">over 100 transactions</div>
       
       <div class="vizor-metric">
         <span class="vizor-metric-label">Total Fees Spent</span>
-        <span class="vizor-metric-value vizor-fee-amount">${l.toFixed(6)} SOL</span>
-      </div>
-      
-      <div class="vizor-metric">
-        <span class="vizor-metric-label">Success Rate</span>
-        <span class="vizor-metric-value">${y}%</span>
-      </div>
+        <span class="vizor-metric-value vizor-fee-amount">${o.toFixed(6)} SOL</span>
+      </div> 
       
       <div class="vizor-transaction-types">
-        <div class="vizor-type-badge vizor-type-swap">
-          Swaps<br><small>${t.types.swap.pct}%</small>
+        <div class="vizor-transaction-title">Transaction Types</div>
+        <div class="vizor-type-labels">
+          <span>Swaps</span>
+          <span>Transfers</span>
+          <span>Others</span>
         </div>
-        <div class="vizor-type-badge vizor-type-transfer">
-          Transfers<br><small>${t.types.transfer.pct}%</small>
+        <div class="vizor-progress-bar">
+          <div style="width: ${t.types.swap.pct}%; background: #5062EE; height: 100%; float: left;"></div>
+          <div style="width: ${t.types.transfer.pct}%; background: #B0E7F5; height: 100%; float: left;"></div>
+          <div style="width: ${t.types.other.pct}%; background: #F5F2F2; height: 100%; float: left;"></div>
         </div>
-        <div class="vizor-type-badge vizor-type-other">
-          Other<br><small>${t.types.other.pct}%</small>
+        <div class="vizor-percentage-labels">
+          <span>${t.types.swap.pct}%</span>
+          <span>${t.types.transfer.pct}%</span>
+          <span>${t.types.other.pct}%</span>
         </div>
       </div>
       
-      <div class="vizor-top-program">
-        <div class="vizor-program-percentage">${E}%</div>
-        ${w.program}
+      <div class="vizor-top-programs">
+        <div class="vizor-transaction-title">Top Programs</div>
+        ${p.map(c=>`
+          <div class="vizor-program-badge">
+            ${c.program}
+          </div>
+        `).join("")}
       </div>
       
-      <div class="vizor-unique-addresses">
-        ${t.uniqueCounterparties} unique addresses
+      <div class="vizor-metric vizor-collapsible">
+        <span class="vizor-metric-label">Unique Addresses</span>
+        <span class="vizor-metric-value">${t.uniqueCounterparties}</span>
+      </div>
+      <div class="vizor-counterparties-list" id="counterparties-list">
+        <div style="color: #333; font-size: 12px; font-weight: 600; margin: 4px 0px 2px 0px;">Top Addresses</div>
+        ${t.topCounterparties?t.topCounterparties.slice(0,5).map(c=>`
+          <div class="vizor-counterparty-item">
+            <a href="${c.url}" target="_blank" rel="noopener noreferrer" class="vizor-counterparty-address">
+              ${c.address}
+            </a>
+          </div>
+        `).join(""):""}
       </div>
       
       <div class="vizor-active-hours">
-        Most active: ${t.activeHours.label}
-        <div class="vizor-timezone-note">in your local timezone</div>
+        <div style="display: flex; flex-direction: column;">
+          <span class="vizor-metric-label">Active Hours</span>
+          <span class="vizor-timezone-note">in your local timezone</span>
+        </div>
+        <span class="vizor-metric-value">${t.activeHours.label}</span>
       </div>
     </div>
-  `}function N(){if(r)return;T(),r=document.createElement("img"),r.id="vizor-btn",r.className="vizor-floating",r.src=chrome.runtime.getURL("icons/vizor-logo.png"),r.alt="Explain TX",r.tabIndex=0,document.documentElement.appendChild(r);const e=()=>{if(C(),x()){const t=L();if(!t){s("No signature detected on this page.");return}R(t)}else if(h()){const t=A();if(!t){s("No address detected on this page.");return}I(t)}else s("Unsupported page type.")};r.onclick=e}function $(){r&&(r.remove(),r=null),n&&(n.remove(),n=null),i&&(i.remove(),i=null)}function g(){d=null,p=null,a=null}function b(e){if(e===v)return;v=e,P(e)?N():($(),g(),i&&!i.classList.contains("vizor-hidden")&&u())}function R(e){if(d===e&&a){s(a);return}d!==e&&(g(),d=e),z();const t=Intl.DateTimeFormat().resolvedOptions().timeZone;chrome.runtime.sendMessage({type:"EXPLAIN_TX",signature:e,tz:t},o=>{if(!o?.ok){a=null,s(o?.error||"Failed to explain.");return}a=o.text,s(o.text)})}function I(e){if(p===e&&a){try{const o=JSON.parse(a);f(o)}catch{s(a)}return}p!==e&&(g(),p=e),z("Analyzing account…");const t=Intl.DateTimeFormat().resolvedOptions().timeZone;chrome.runtime.sendMessage({type:"EXPLAIN_ACCOUNT",address:e,tz:t},o=>{if(console.log("Account insights response:",o.data),!o?.ok){a=null,s(o?.error||"Failed to analyze account.");return}if(!o.data){s("No data received from server.");return}a=JSON.stringify(o.data),f(o.data)})}b(location.href);chrome.runtime.onMessage.addListener(e=>{e?.type==="URL_CHANGED"&&b(e.url||location.href)});
+  `;const g=r.querySelector(".vizor-collapsible"),x=r.querySelector("#counterparties-list");g&&x&&g.addEventListener("click",()=>{x.classList.toggle("expanded")})}function $(){if(s)return;L(),s=document.createElement("img"),s.id="vizor-btn",s.className="vizor-floating",s.src=chrome.runtime.getURL("icons/vizor-logo.png"),s.alt="Explain TX",s.tabIndex=0,document.documentElement.appendChild(s);const e=()=>{if(P(),z()){const t=T();if(!t){l("No signature detected on this page.");return}N(t)}else if(y()){const t=A();if(!t){l("No address detected on this page.");return}F(t)}else l("Unsupported page type.")};s.onclick=e}function C(){s&&(s.remove(),s=null),n&&(n.remove(),n=null),i&&(i.remove(),i=null)}function f(){d=null,v=null,a=null}function E(e){if(e===h)return;h=e,S(e)?$():(C(),f(),i&&!i.classList.contains("vizor-hidden")&&u())}function N(e){if(d===e&&a){l(a);return}d!==e&&(f(),d=e),w();const t=Intl.DateTimeFormat().resolvedOptions().timeZone;chrome.runtime.sendMessage({type:"EXPLAIN_TX",signature:e,tz:t},o=>{if(!o?.ok){a=null,l(o?.error||"Failed to explain.");return}a=o.text,l(o.text)})}function F(e){if(v===e&&a){try{const o=JSON.parse(a);m(o)}catch{l(a)}return}v!==e&&(f(),v=e),w("Analyzing account…");const t=Intl.DateTimeFormat().resolvedOptions().timeZone;chrome.runtime.sendMessage({type:"EXPLAIN_ACCOUNT",address:e,tz:t},o=>{if(console.log("Account insights response:",o.data),!o?.ok){a=null,l(o?.error||"Failed to analyze account.");return}if(!o.data){l("No data received from server.");return}a=JSON.stringify(o.data),m(o.data)})}E(location.href);chrome.runtime.onMessage.addListener(e=>{e?.type==="URL_CHANGED"&&E(e.url||location.href)});

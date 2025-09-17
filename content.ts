@@ -67,7 +67,7 @@ const STYLE = `
   font-size: 11px;
   color: #666;
   margin-bottom: 12px;
-  text-align: center;
+  text-align: left;
   font-weight: 500;
 }
 
@@ -79,13 +79,20 @@ const STYLE = `
   border-bottom: 1px solid #f0f0f0;
 }
 
+.vizor-active-hours {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+}
+
 .vizor-metric:last-child {
   border-bottom: none;
 }
 
 .vizor-metric-label {
-  color: #555;
-  font-weight: 500;
+  color: #333;
+  font-weight: 600;
 }
 
 .vizor-metric-value {
@@ -110,95 +117,118 @@ const STYLE = `
 }
 
 .vizor-transaction-types {
-  display: flex;
-  gap: 8px;
-  margin: 8px 0;
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
 }
 
-.vizor-type-badge {
-  flex: 1;
-  text-align: center;
-  padding: 6px 4px;
+.vizor-transaction-title {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.vizor-progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 4px;
+  margin-top: 2px;
+}
+
+.vizor-type-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.vizor-percentage-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: #333;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.vizor-top-programs {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.vizor-program-badge {
+  display: inline-block;
+  background: #5062EE;
+  color: white;
+  padding: 6px 10px;
   border-radius: 8px;
   font-size: 11px;
   font-weight: 600;
-}
-
-.vizor-type-swap {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-  color: white;
-}
-
-.vizor-type-transfer {
-  background: linear-gradient(135deg, #4ecdc4, #44a08d);
-  color: white;
-}
-
-.vizor-type-other {
-  background: linear-gradient(135deg, #a8e6cf, #7fcdcd);
-  color: #2c3e50;
-}
-
-.vizor-top-program {
-  background: linear-gradient(135deg, #667eea, #764ba2);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  margin: 8px 0;
-  text-align: center;
-  font-weight: 600;
-  position: relative;
-}
-
-.vizor-program-percentage {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  background: #ff6b6b;
-  color: white;
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  border: 2px solid white;
-}
-
-.vizor-unique-addresses {
-  background: linear-gradient(135deg, #ffeaa7, #fab1a0);
-  color: #2d3436;
-  padding: 8px 12px;
-  border-radius: 10px;
-  text-align: center;
-  font-weight: 600;
-  margin: 8px 0;
-}
-
-.vizor-active-hours {
-  background: linear-gradient(135deg, #74b9ff, #0984e3);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 10px;
-  text-align: center;
-  font-weight: 600;
-  margin: 8px 0;
-  position: relative;
+  margin: 0px 4px 0px 0;
 }
 
 .vizor-timezone-note {
   font-size: 10px;
-  color: rgba(255,255,255,0.8);
+  color: #666;
   font-weight: 400;
-  margin-top: 2px;
+}
+
+.vizor-collapsible {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.vizor-collapsible:hover {
+  background-color: #f8f9fa;
+}
+
+.vizor-counterparties-list {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  border-radius: 6px;
+}
+
+.vizor-counterparties-list.expanded {
+  max-height: 200px;
+}
+
+.vizor-counterparty-item {
+  padding: 2px;
+  font-size: 11px;
+}
+
+.vizor-counterparty-item:last-child {
+  border-bottom: none;
+}
+
+.vizor-counterparty-address {
+  color: #5062EE;
+  text-decoration: none;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.vizor-counterparty-address:hover {
+  text-decoration: underline;
+}
+
+.vizor-counterparty-stats {
+  color: #666;
+  font-size: 10px;
 }
 .vizor-card h3 { margin: 0 0 8px; font-size: 16px; }
 .vizor-close { position: absolute; right: 16px; margin-top: -4px; cursor: pointer; font-size: 18px; }
 .vizor-body { 
-  white-space: pre-wrap; 
+  white-space: normal; 
   padding-right: 24px; /* Add right padding to prevent text overlap with close button */
+}
+.vizor-body.is-pre {
+  white-space: pre-wrap;
 }
 .vizor-loading { display:flex; align-items:center; gap:10px; }
 .vizor-spinner {
@@ -261,7 +291,7 @@ let currentResponse: string | null = null;
 
 function ensurePopup() {
   if (popup) return;
-  
+
   // Create overlay with very light background
   overlay = document.createElement("div");
   overlay.className = "vizor-overlay";
@@ -277,7 +307,7 @@ function ensurePopup() {
     pointer-events: none;
   `;
   document.documentElement.appendChild(overlay);
-  
+
   // Create popup with inline styles
   popup = document.createElement("div");
   popup.className = "vizor-popup";
@@ -300,7 +330,7 @@ function ensurePopup() {
   bodyEl = popup.querySelector(".vizor-body") as HTMLDivElement;
   const close = popup.querySelector(".vizor-close") as HTMLDivElement;
   close.onclick = () => hidePopup();
-  
+
   // Close on overlay click
   overlay.onclick = () => hidePopup();
 
@@ -317,7 +347,7 @@ function ensurePopup() {
 
 function showPopup() {
   ensurePopup();
-  
+
   overlay!.style.opacity = "1";
   overlay!.style.pointerEvents = "auto";
   popup!.style.opacity = "1";
@@ -337,6 +367,7 @@ function hidePopup() {
 
 function setLoading(msg = "Explaining transaction…") {
   if (!bodyEl) return;
+  bodyEl.classList.add("is-pre");
   bodyEl.innerHTML = `
     <div class="vizor-loading">
       <div class="vizor-spinner"></div>
@@ -347,6 +378,7 @@ function setLoading(msg = "Explaining transaction…") {
 
 function renderText(text: string) {
   if (!bodyEl) return;
+  bodyEl.classList.add("is-pre");
   bodyEl.textContent = text;
 }
 
@@ -360,66 +392,93 @@ function renderWalletInsights(data: any) {
       return;
     }
   }
-  
+
+  // Ensure HTML rendering for insights
+  bodyEl.classList.remove("is-pre");
+
   console.log("Rendering wallet insights with data:", data, data.insights);
-  
+
   if (!data || !data.insights) {
     console.error("Invalid data structure:", data);
     renderText("Invalid data received from server.");
     return;
   }
-  
+
   const insights = data.insights;
-  const totalTx = insights.totalTx;
   const feeAmount = insights.fee.totalSol;
-  const successRate = Math.round(insights.successRate * 100);
-  const topProgram = insights.topPrograms[0];
-  const topProgramPct = Math.round(insights.topProgramShare * 100);
-  
-  // Format transaction count header
-  const txCountText = totalTx >= 100 ? `over ${Math.floor(totalTx / 100) * 100} transactions` : `${totalTx} transactions`;
-  
+  const topPrograms = insights.topPrograms.slice(0, 3);
+
   bodyEl.innerHTML = `
     <div class="vizor-insights">
-      <div class="vizor-insights-header">${txCountText}</div>
+      <div class="vizor-insights-header">over 100 transactions</div>
       
       <div class="vizor-metric">
         <span class="vizor-metric-label">Total Fees Spent</span>
         <span class="vizor-metric-value vizor-fee-amount">${feeAmount.toFixed(6)} SOL</span>
-      </div>
-      
-      <div class="vizor-metric">
-        <span class="vizor-metric-label">Success Rate</span>
-        <span class="vizor-metric-value">${successRate}%</span>
-      </div>
+      </div> 
       
       <div class="vizor-transaction-types">
-        <div class="vizor-type-badge vizor-type-swap">
-          Swaps<br><small>${insights.types.swap.pct}%</small>
+        <div class="vizor-transaction-title">Transaction Types</div>
+        <div class="vizor-type-labels">
+          <span>Swaps</span>
+          <span>Transfers</span>
+          <span>Others</span>
         </div>
-        <div class="vizor-type-badge vizor-type-transfer">
-          Transfers<br><small>${insights.types.transfer.pct}%</small>
+        <div class="vizor-progress-bar">
+          <div style="width: ${insights.types.swap.pct}%; background: #5062EE; height: 100%; float: left;"></div>
+          <div style="width: ${insights.types.transfer.pct}%; background: #B0E7F5; height: 100%; float: left;"></div>
+          <div style="width: ${insights.types.other.pct}%; background: #F5F2F2; height: 100%; float: left;"></div>
         </div>
-        <div class="vizor-type-badge vizor-type-other">
-          Other<br><small>${insights.types.other.pct}%</small>
+        <div class="vizor-percentage-labels">
+          <span>${insights.types.swap.pct}%</span>
+          <span>${insights.types.transfer.pct}%</span>
+          <span>${insights.types.other.pct}%</span>
         </div>
       </div>
       
-      <div class="vizor-top-program">
-        <div class="vizor-program-percentage">${topProgramPct}%</div>
-        ${topProgram.program}
+      <div class="vizor-top-programs">
+        <div class="vizor-transaction-title">Top Programs</div>
+        ${topPrograms.map((program: any) => `
+          <div class="vizor-program-badge">
+            ${program.program}
+          </div>
+        `).join('')}
       </div>
       
-      <div class="vizor-unique-addresses">
-        ${insights.uniqueCounterparties} unique addresses
+      <div class="vizor-metric vizor-collapsible">
+        <span class="vizor-metric-label">Unique Addresses</span>
+        <span class="vizor-metric-value">${insights.uniqueCounterparties}</span>
+      </div>
+      <div class="vizor-counterparties-list" id="counterparties-list">
+        <div style="color: #333; font-size: 12px; font-weight: 600; margin: 4px 0px 2px 0px;">Top Addresses</div>
+        ${insights.topCounterparties ? insights.topCounterparties.slice(0, 5).map((counterparty: any) => `
+          <div class="vizor-counterparty-item">
+            <a href="${counterparty.url}" target="_blank" rel="noopener noreferrer" class="vizor-counterparty-address">
+              ${counterparty.address}
+            </a>
+          </div>
+        `).join('') : ''}
       </div>
       
       <div class="vizor-active-hours">
-        Most active: ${insights.activeHours.label}
-        <div class="vizor-timezone-note">in your local timezone</div>
+        <div style="display: flex; flex-direction: column;">
+          <span class="vizor-metric-label">Active Hours</span>
+          <span class="vizor-timezone-note">in your local timezone</span>
+        </div>
+        <span class="vizor-metric-value">${insights.activeHours.label}</span>
       </div>
     </div>
   `;
+
+  // Add click handler for collapsible counterparties
+  const collapsibleElement = bodyEl.querySelector('.vizor-collapsible');
+  const counterpartiesList = bodyEl.querySelector('#counterparties-list');
+
+  if (collapsibleElement && counterpartiesList) {
+    collapsibleElement.addEventListener('click', () => {
+      counterpartiesList.classList.toggle('expanded');
+    });
+  }
 }
 
 function injectButton() {
@@ -437,7 +496,7 @@ function injectButton() {
 
   const trigger = () => {
     showPopup();
-    
+
     if (isTxPage()) {
       const sig = getSignature();
       if (!sig) {
