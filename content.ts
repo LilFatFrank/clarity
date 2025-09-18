@@ -396,8 +396,6 @@ function renderWalletInsights(data: any) {
   // Ensure HTML rendering for insights
   bodyEl.classList.remove("is-pre");
 
-  console.log("Rendering wallet insights with data:", data, data.insights);
-
   if (!data || !data.insights) {
     console.error("Invalid data structure:", data);
     renderText("Invalid data received from server.");
@@ -446,11 +444,11 @@ function renderWalletInsights(data: any) {
       </div>
       
       <div class="vizor-metric vizor-collapsible">
-        <span class="vizor-metric-label">Unique Addresses</span>
+        <span class="vizor-metric-label">Wallets Interacted</span>
         <span class="vizor-metric-value">${insights.uniqueCounterparties}</span>
       </div>
       <div class="vizor-counterparties-list" id="counterparties-list">
-        <div style="color: #333; font-size: 12px; font-weight: 600; margin: 4px 0px 2px 0px;">Top Addresses</div>
+        <div style="color: #333; font-size: 12px; font-weight: 600; margin: 4px 0px 2px 0px;">Top Wallets</div>
         ${insights.topCounterparties ? insights.topCounterparties.slice(0, 5).map((counterparty: any) => `
           <div class="vizor-counterparty-item">
             <a href="${counterparty.url}" target="_blank" rel="noopener noreferrer" class="vizor-counterparty-address">
@@ -601,7 +599,6 @@ function explainAccount(address: string) {
   setLoading("Analyzing account…");
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   chrome.runtime.sendMessage({ type: "EXPLAIN_ACCOUNT", address, tz }, (resp) => {
-    console.log("Account insights response:", resp.data);
     if (!resp?.ok) {
       currentResponse = null;
       renderText(resp?.error || "Failed to analyze account.");

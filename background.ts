@@ -1,5 +1,6 @@
 // background.ts
 const SOLSCAN_HOST = "solscan.io";
+const BASE_URL = "https://vizor-api.vercel.app";
 
 function notify(tabId: number, url?: string) {
   // Content script may not be injected on every page; ignore failures.
@@ -69,7 +70,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           return;
         }
 
-        const resp = await fetch("http://localhost:3001/api/transactions/explain", {
+        const resp = await fetch(`${BASE_URL}/api/transactions/explain`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ signature, tz }),
@@ -104,7 +105,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
           return;
         }
 
-        const resp = await fetch("http://localhost:3001/api/wallets/insights", {
+        const resp = await fetch(`${BASE_URL}/api/wallets/insights`, {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ address, tz }),
@@ -116,7 +117,6 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         }
 
         const data = await resp.json();
-        console.log("Account insights response:", data);
         sendResponse({ ok: true, data });
       } catch (e: any) {
         sendResponse({ ok: false, error: e?.message || String(e) });
