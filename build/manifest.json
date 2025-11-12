@@ -11,7 +11,7 @@
     "128": "icons/vizor-icon-128.png"
   },
   "permissions": ["webNavigation", "tabs"],
-  "host_permissions": ["https://*.solscan.io/*", "https://vizor-api.vercel.app/*"],
+  "host_permissions": ["https://*.solscan.io/*", "http://localhost:3001/*"],
   "background": { "service_worker": "background.js", "type": "module" },
   "content_scripts": [
     {
