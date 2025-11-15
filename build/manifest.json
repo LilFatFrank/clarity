@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Vizor",
   "short_name": "Vizor",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Understand transactions and get wallet insights in one click. Solana made simple.",
   "icons": {
     "16": "icons/vizor-icon-16.png",
