@@ -10,6 +10,7 @@ export default defineConfig({
       input: {
         content: "./content.ts",
         background: "./background.ts",
+        popup: "./popup.ts",
       },
       output: {
         // IMPORTANT: avoid shared chunks or dynamic imports for content scripts
@@ -17,6 +18,7 @@ export default defineConfig({
         entryFileNames: (chunk) => {
           if (chunk.name === "content") return "content.js";
           if (chunk.name === "background") return "background.js";
+          if (chunk.name === "popup") return "popup.js";
           return "[name].js";
         },
         assetFileNames: "[name][extname]",

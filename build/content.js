@@ -1,4 +1,4 @@
-console.log("[vizor] content script loaded on",location.href);const k=`
+console.log("[vizor] content script loaded on",location.href);const L=`
 .vizor-floating {
   position: fixed;
   right: 18px;
@@ -36,6 +36,149 @@ console.log("[vizor] content script loaded on",location.href);const k=`
   box-shadow:
     0 0 0 3px rgba(255,255,255,.95),
     0 0 0 6px rgba(26,115,232,.75);
+}
+
+/* Password Prompt Overlay */
+.vizor-password-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vizorFadeIn 0.2s ease;
+}
+
+.vizor-password-modal {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 380px;
+  animation: vizorSlideUp 0.3s ease;
+}
+
+.vizor-password-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.vizor-password-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.vizor-password-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.vizor-password-subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+.vizor-password-input {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.vizor-password-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.vizor-password-error {
+  color: #dc3545;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.vizor-password-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.vizor-password-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vizor-password-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.vizor-password-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.vizor-password-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vizor-password-btn-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.vizor-password-btn-secondary:hover {
+  background: #f8f9fa;
+}
+
+.vizor-password-help {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+}
+
+.vizor-password-help-link {
+  color: #667eea;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+@keyframes vizorFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vizorSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Popup + card etc. */
@@ -231,7 +374,7 @@ console.log("[vizor] content script loaded on",location.href);const k=`
   border:2px solid #ddd; border-top-color:#111; animation: vizor-spin 0.8s linear infinite;
 }
 @keyframes vizor-spin { to { transform: rotate(360deg); } }
-`;function L(){if(document.getElementById("vizor-style"))return;const e=document.createElement("style");e.id="vizor-style",e.textContent=k,document.documentElement.appendChild(e)}const z=(e=location.href)=>/:\/\/(?:www\.)?solscan\.io\/tx\//i.test(e),y=(e=location.href)=>/:\/\/(?:www\.)?solscan\.io\/account\//i.test(e),S=(e=location.href)=>z(e)||y(e);function T(e=location.href){try{const o=new URL(e).pathname.split("/").filter(Boolean),p=o.indexOf("tx");return p>=0&&o[p+1]?o[p+1]:null}catch{return null}}function P(e=location.href){try{const o=new URL(e).pathname.split("/").filter(Boolean),p=o.indexOf("account");return p>=0&&o[p+1]?o[p+1]:null}catch{return null}}let i=null,n=null,r=null,s=null,h="",d=null,v=null,a=null;function b(){if(i)return;n=document.createElement("div"),n.className="vizor-overlay",n.style.cssText=`
+`;function T(){if(document.getElementById("vizor-style"))return;const e=document.createElement("style");e.id="vizor-style",e.textContent=L,document.documentElement.appendChild(e)}const z=(e=location.href)=>/:\/\/(?:www\.)?solscan\.io\/tx\//i.test(e),y=(e=location.href)=>/:\/\/(?:www\.)?solscan\.io\/account\//i.test(e),C=(e=location.href)=>z(e)||y(e);function U(e=location.href){try{const o=new URL(e).pathname.split("/").filter(Boolean),i=o.indexOf("tx");return i>=0&&o[i+1]?o[i+1]:null}catch{return null}}function $(e=location.href){try{const o=new URL(e).pathname.split("/").filter(Boolean),i=o.indexOf("account");return i>=0&&o[i+1]?o[i+1]:null}catch{return null}}let r=null,s=null,n=null,a=null,m="",v=null,x=null,l=null;function w(){if(r)return;s=document.createElement("div"),s.className="vizor-overlay",s.style.cssText=`
     position: fixed;
     top: 0;
     left: 0;
@@ -241,24 +384,24 @@ console.log("[vizor] content script loaded on",location.href);const k=`
     z-index: 2147483646;
     opacity: 0;
     pointer-events: none;
-  `,document.documentElement.appendChild(n),i=document.createElement("div"),i.className="vizor-popup",i.style.cssText=`
+  `,document.documentElement.appendChild(s),r=document.createElement("div"),r.className="vizor-popup",r.style.cssText=`
     position: fixed;
     right: 18px;
     bottom: 70px;
     z-index: 2147483647;
     opacity: 0;
     pointer-events: none;
-  `,i.innerHTML=`
+  `,r.innerHTML=`
     <div class="vizor-card">
       <div class="vizor-close" title="Close">×</div>
       <div class="vizor-body">Ready.</div>
     </div>
-  `,document.documentElement.appendChild(i),r=i.querySelector(".vizor-body");const e=i.querySelector(".vizor-close");e.onclick=()=>u(),n.onclick=()=>u(),document.addEventListener("keydown",t=>{t.key==="Escape"&&i&&i.style.opacity!=="0"&&u()})}function $(){b(),n.style.opacity="1",n.style.pointerEvents="auto",i.style.opacity="1",i.style.pointerEvents="auto"}function u(){n&&(n.style.opacity="0",n.style.pointerEvents="none"),i&&(i.style.opacity="0",i.style.pointerEvents="none")}function w(e="Explaining transaction…"){r&&(r.classList.add("is-pre"),r.innerHTML=`
+  `,document.documentElement.appendChild(r),n=r.querySelector(".vizor-body");const e=r.querySelector(".vizor-close");e.onclick=()=>g(),s.onclick=()=>g(),document.addEventListener("keydown",t=>{t.key==="Escape"&&r&&r.style.opacity!=="0"&&g()})}function P(){w(),s.style.opacity="1",s.style.pointerEvents="auto",r.style.opacity="1",r.style.pointerEvents="auto"}function g(){s&&(s.style.opacity="0",s.style.pointerEvents="none"),r&&(r.style.opacity="0",r.style.pointerEvents="none")}function k(e="Explaining transaction…"){n&&(n.classList.add("is-pre"),n.innerHTML=`
     <div class="vizor-loading">
       <div class="vizor-spinner"></div>
       <div>${e}</div>
     </div>
-  `)}function l(e){r&&(r.classList.add("is-pre"),r.textContent=e)}function m(e){if(!r&&(console.error("bodyEl is null, ensuring popup is created"),b(),r=i?.querySelector(".vizor-body"),!r)){console.error("Still no bodyEl after ensuring popup");return}if(r.classList.remove("is-pre"),!e||!e.insights){console.error("Invalid data structure:",e),l("Invalid data received from server.");return}const t=e.insights,o=t.fee.totalSol,p=t.topPrograms.slice(0,3);r.innerHTML=`
+  `)}function p(e){n&&(n.classList.add("is-pre"),n.textContent=e)}function h(e){if(!n&&(console.error("bodyEl is null, ensuring popup is created"),w(),n=r?.querySelector(".vizor-body"),!n)){console.error("Still no bodyEl after ensuring popup");return}if(n.classList.remove("is-pre"),!e||!e.insights){console.error("Invalid data structure:",e),p("Invalid data received from server.");return}const t=e.insights,o=t.fee.totalSol,i=t.topPrograms.slice(0,3);n.innerHTML=`
     <div class="vizor-insights">
       <div class="vizor-insights-header">over 100 transactions</div>
       
@@ -288,9 +431,9 @@ console.log("[vizor] content script loaded on",location.href);const k=`
       
       <div class="vizor-top-programs">
         <div class="vizor-transaction-title">Top Programs</div>
-        ${p.map(c=>`
+        ${i.map(d=>`
           <div class="vizor-program-badge">
-            ${c.program}
+            ${d.program}
           </div>
         `).join("")}
       </div>
@@ -301,10 +444,10 @@ console.log("[vizor] content script loaded on",location.href);const k=`
       </div>
       <div class="vizor-counterparties-list" id="counterparties-list">
         <div style="color: #333; font-size: 12px; font-weight: 600; margin: 4px 0px 2px 0px;">Top Wallets</div>
-        ${t.topCounterparties?t.topCounterparties.slice(0,5).map(c=>`
+        ${t.topCounterparties?t.topCounterparties.slice(0,5).map(d=>`
           <div class="vizor-counterparty-item">
-            <a href="${c.url}" target="_blank" rel="noopener noreferrer" class="vizor-counterparty-address">
-              ${c.address}
+            <a href="${d.url}" target="_blank" rel="noopener noreferrer" class="vizor-counterparty-address">
+              ${d.address}
             </a>
           </div>
         `).join(""):""}
@@ -318,4 +461,78 @@ console.log("[vizor] content script loaded on",location.href);const k=`
         <span class="vizor-metric-value">${t.activeHours.label}</span>
       </div>
     </div>
-  `;const g=r.querySelector(".vizor-collapsible"),x=r.querySelector("#counterparties-list");g&&x&&g.addEventListener("click",()=>{x.classList.toggle("expanded")})}function C(){if(s)return;L(),s=document.createElement("img"),s.id="vizor-btn",s.className="vizor-floating",s.src=chrome.runtime.getURL("icons/vizor-logo.png"),s.alt="Explain TX",s.tabIndex=0,document.documentElement.appendChild(s);const e=()=>{if($(),z()){const t=T();if(!t){l("No signature detected on this page.");return}N(t)}else if(y()){const t=P();if(!t){l("No address detected on this page.");return}I(t)}else l("Unsupported page type.")};s.onclick=e}function A(){s&&(s.remove(),s=null),n&&(n.remove(),n=null),i&&(i.remove(),i=null)}function f(){d=null,v=null,a=null}function E(e){if(e===h)return;h=e,S(e)?C():(A(),f(),i&&!i.classList.contains("vizor-hidden")&&u())}function N(e){if(d===e&&a){l(a);return}d!==e&&(f(),d=e),w();const t=Intl.DateTimeFormat().resolvedOptions().timeZone;chrome.runtime.sendMessage({type:"EXPLAIN_TX",signature:e,tz:t},o=>{if(!o?.ok){a=null,l(o?.error||"Failed to explain.");return}a=o.text,l(o.text)})}function I(e){if(v===e&&a){try{const o=JSON.parse(a);m(o)}catch{l(a)}return}v!==e&&(f(),v=e),w("Analyzing account…");const t=Intl.DateTimeFormat().resolvedOptions().timeZone;chrome.runtime.sendMessage({type:"EXPLAIN_ACCOUNT",address:e,tz:t},o=>{if(!o?.ok){a=null,l(o?.error||"Failed to analyze account.");return}if(!o.data){l("No data received from server.");return}a=JSON.stringify(o.data),m(o.data)})}E(location.href);chrome.runtime.onMessage.addListener(e=>{e?.type==="URL_CHANGED"&&E(e.url||location.href)});
+  `;const c=n.querySelector(".vizor-collapsible"),u=n.querySelector("#counterparties-list");c&&u&&c.addEventListener("click",()=>{u.classList.toggle("expanded")})}function b(e){const t=document.querySelector(".vizor-unlock-prompt");t&&t.remove();const o=e==="create",i=document.createElement("div");i.className="vizor-unlock-prompt",i.style.cssText=`
+    position: fixed;
+    right: 18px;
+    bottom: 80px;
+    z-index: 2147483646;
+    width: 320px;
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 16px 44px rgba(0,0,0,0.22);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    animation: vizorSlideUp 0.3s ease;
+  `,i.innerHTML=`
+    <div style="text-align: center; margin-bottom: 16px;">
+      <div style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px;">
+        ${o?"Wallet Setup Required":"Wallet Locked"}
+      </div>
+      <div style="font-size: 14px; color: #666;">
+        ${o?"Create your wallet to continue":"Unlock your wallet to continue"}
+      </div>
+    </div>
+    
+    <button id="vizor-open-extension-btn" style="
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin-bottom: 12px;
+    ">
+      ${o?"Create Wallet":"Unlock Wallet"}
+    </button>
+    
+    <button id="vizor-unlock-cancel-btn" style="
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: #666;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+    ">
+      Cancel
+    </button>
+    
+    <div style="font-size: 12px; color: #888; text-align: center; margin-top: 12px;">
+      ${o?"This will open the Vizor extension":"Click the extension icon to unlock"}
+    </div>
+  `,document.body.appendChild(i);const c=i.querySelector("#vizor-open-extension-btn");c.onmouseover=()=>{c.style.transform="translateY(-1px)"},c.onmouseout=()=>{c.style.transform="none"},c.onclick=()=>{const d=document.createElement("div");d.style.cssText=`
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2147483647;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      font-family: system-ui;
+      font-size: 14px;
+      animation: vizorFadeIn 0.3s ease;
+    `;const S=chrome.runtime.getURL("icons/vizor-logo.png");d.innerHTML=`
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="${S}" alt="Vizor" style="width: 32px; height: 32px; border-radius: 50%;" />
+        <div>
+          <div style="font-weight: 600; margin-bottom: 2px;">Click the Vizor icon</div>
+          <div style="opacity: 0.9; font-size: 12px;">Look in your browser toolbar →</div>
+        </div>
+      </div>
+    `,document.body.appendChild(d),setTimeout(()=>d.remove(),4e3),i.remove()};const u=i.querySelector("#vizor-unlock-cancel-btn");u.onclick=()=>i.remove(),setTimeout(()=>{i.parentElement&&i.remove()},1e4)}function A(){if(a)return;T(),a=document.createElement("img"),a.id="vizor-btn",a.className="vizor-floating",a.src=chrome.runtime.getURL("icons/vizor-logo.png"),a.alt="Explain TX",a.tabIndex=0,document.documentElement.appendChild(a);const e=async()=>{const{hasWallet:t,isUnlocked:o}=await chrome.runtime.sendMessage({type:"CHECK_WALLET_STATUS"});if(!t){b("create");return}if(!o){b("unlock");return}if(P(),z()){const i=U();if(!i){p("No signature detected on this page.");return}N(i)}else if(y()){const i=$();if(!i){p("No address detected on this page.");return}F(i)}else p("Unsupported page type.")};a.onclick=e}function I(){a&&(a.remove(),a=null),s&&(s.remove(),s=null),r&&(r.remove(),r=null)}function f(){v=null,x=null,l=null}function E(e){if(e===m)return;m=e,C(e)?A():(I(),f(),r&&!r.classList.contains("vizor-hidden")&&g())}function N(e){if(v===e&&l){p(l);return}v!==e&&(f(),v=e),k();const t=Intl.DateTimeFormat().resolvedOptions().timeZone;chrome.runtime.sendMessage({type:"EXPLAIN_TX",signature:e,tz:t},o=>{if(!o?.ok){l=null,p(o?.error||"Failed to explain.");return}l=o.text,p(o.text)})}function F(e){if(x===e&&l){try{const o=JSON.parse(l);h(o)}catch{p(l)}return}x!==e&&(f(),x=e),k("Analyzing account…");const t=Intl.DateTimeFormat().resolvedOptions().timeZone;chrome.runtime.sendMessage({type:"EXPLAIN_ACCOUNT",address:e,tz:t},o=>{if(!o?.ok){l=null,p(o?.error||"Failed to analyze account.");return}if(!o.data){p("No data received from server.");return}l=JSON.stringify(o.data),h(o.data)})}E(location.href);chrome.runtime.onMessage.addListener(e=>{e?.type==="URL_CHANGED"&&E(e.url||location.href)});

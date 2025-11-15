@@ -43,6 +43,149 @@ const STYLE = `
     0 0 0 6px rgba(26,115,232,.75);
 }
 
+/* Password Prompt Overlay */
+.vizor-password-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vizorFadeIn 0.2s ease;
+}
+
+.vizor-password-modal {
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  width: 90%;
+  max-width: 380px;
+  animation: vizorSlideUp 0.3s ease;
+}
+
+.vizor-password-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.vizor-password-icon {
+  font-size: 48px;
+  margin-bottom: 12px;
+}
+
+.vizor-password-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 8px;
+}
+
+.vizor-password-subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+.vizor-password-input {
+  width: 100%;
+  padding: 14px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 16px;
+  margin-bottom: 16px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.vizor-password-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.vizor-password-error {
+  color: #dc3545;
+  font-size: 13px;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.vizor-password-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.vizor-password-btn {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.vizor-password-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.vizor-password-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.vizor-password-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vizor-password-btn-secondary {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.vizor-password-btn-secondary:hover {
+  background: #f8f9fa;
+}
+
+.vizor-password-help {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+  font-size: 12px;
+  color: #666;
+}
+
+.vizor-password-help-link {
+  color: #667eea;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+@keyframes vizorFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vizorSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* Popup + card etc. */
 .vizor-popup { 
   position: fixed; 
@@ -479,6 +622,132 @@ function renderWalletInsights(data: any) {
   }
 }
 
+// Simple unlock prompt - positioned near floating button
+function showUnlockPrompt(mode: "create" | "unlock") {
+  // Remove existing prompt if any
+  const existingPrompt = document.querySelector(".vizor-unlock-prompt");
+  if (existingPrompt) existingPrompt.remove();
+
+  const isCreate = mode === "create";
+  
+  const promptCard = document.createElement("div");
+  promptCard.className = "vizor-unlock-prompt";
+  promptCard.style.cssText = `
+    position: fixed;
+    right: 18px;
+    bottom: 80px;
+    z-index: 2147483646;
+    width: 320px;
+    background: white;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 16px 44px rgba(0,0,0,0.22);
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    animation: vizorSlideUp 0.3s ease;
+  `;
+  
+  promptCard.innerHTML = `
+    <div style="text-align: center; margin-bottom: 16px;">
+      <div style="font-size: 18px; font-weight: 600; color: #1a1a1a; margin-bottom: 6px;">
+        ${isCreate ? "Wallet Setup Required" : "Wallet Locked"}
+      </div>
+      <div style="font-size: 14px; color: #666;">
+        ${isCreate 
+          ? "Create your wallet to continue" 
+          : "Unlock your wallet to continue"}
+      </div>
+    </div>
+    
+    <button id="vizor-open-extension-btn" style="
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+      margin-bottom: 12px;
+    ">
+      ${isCreate ? "Create Wallet" : "Unlock Wallet"}
+    </button>
+    
+    <button id="vizor-unlock-cancel-btn" style="
+      width: 100%;
+      padding: 12px;
+      background: transparent;
+      color: #666;
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+    ">
+      Cancel
+    </button>
+    
+    <div style="font-size: 12px; color: #888; text-align: center; margin-top: 12px;">
+      ${isCreate 
+        ? "This will open the Vizor extension" 
+        : "Click the extension icon to unlock"}
+    </div>
+  `;
+  
+  document.body.appendChild(promptCard);
+  
+  // Open extension popup button
+  const openBtn = promptCard.querySelector("#vizor-open-extension-btn") as HTMLButtonElement;
+  openBtn.onmouseover = () => {
+    openBtn.style.transform = "translateY(-1px)";
+  };
+  openBtn.onmouseout = () => {
+    openBtn.style.transform = "none";
+  };
+  openBtn.onclick = () => {
+    // Show instruction to click extension icon
+    const hint = document.createElement("div");
+    hint.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 2147483647;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      font-family: system-ui;
+      font-size: 14px;
+      animation: vizorFadeIn 0.3s ease;
+    `;
+    const hintLogoUrl = chrome.runtime.getURL("icons/vizor-logo.png");
+    hint.innerHTML = `
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <img src="${hintLogoUrl}" alt="Vizor" style="width: 32px; height: 32px; border-radius: 50%;" />
+        <div>
+          <div style="font-weight: 600; margin-bottom: 2px;">Click the Vizor icon</div>
+          <div style="opacity: 0.9; font-size: 12px;">Look in your browser toolbar →</div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(hint);
+    
+    setTimeout(() => hint.remove(), 4000);
+    promptCard.remove();
+  };
+  
+  // Cancel button
+  const cancelBtn = promptCard.querySelector("#vizor-unlock-cancel-btn") as HTMLButtonElement;
+  cancelBtn.onclick = () => promptCard.remove();
+  
+  // Auto-remove after 10 seconds
+  setTimeout(() => {
+    if (promptCard.parentElement) {
+      promptCard.remove();
+    }
+  }, 10000);
+}
+
 function injectButton() {
   if (btn) return;
   ensureStyle();
@@ -492,7 +761,25 @@ function injectButton() {
 
   document.documentElement.appendChild(btn);
 
-  const trigger = () => {
+  const trigger = async () => {
+    // Check wallet status first
+    const { hasWallet, isUnlocked } = await chrome.runtime.sendMessage({
+      type: "CHECK_WALLET_STATUS",
+    });
+
+    if (!hasWallet) {
+      // No wallet created yet - show simple prompt to open extension
+      showUnlockPrompt("create");
+      return;
+    }
+
+    if (!isUnlocked) {
+      // Wallet exists but locked - show prompt to open extension
+      showUnlockPrompt("unlock");
+      return;
+    }
+
+    // Wallet is unlocked - proceed with explanation
     showPopup();
 
     if (isTxPage()) {

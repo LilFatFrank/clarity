@@ -10,8 +10,8 @@
     "48": "icons/vizor-icon-48.png",
     "128": "icons/vizor-icon-128.png"
   },
-  "permissions": ["webNavigation", "tabs"],
-  "host_permissions": ["https://*.solscan.io/*", "http://localhost:3001/*"],
+  "permissions": ["webNavigation", "tabs", "storage"],
+  "host_permissions": ["https://*.solscan.io/*", "https://vizor-api.vercel.app/*"],
   "background": { "service_worker": "background.js", "type": "module" },
   "content_scripts": [
     {
@@ -27,10 +27,13 @@
     }
   ],
   "action": {
-    "default_title": "Vizor",
+    "default_popup": "popup.html",
+    "default_title": "Vizor Wallet",
     "default_icon": {
       "16": "icons/vizor-icon-16.png",
-      "32": "icons/vizor-icon-32.png"
+      "32": "icons/vizor-icon-32.png",
+      "48": "icons/vizor-icon-48.png",
+      "128": "icons/vizor-icon-128.png"
     }
   }
 }

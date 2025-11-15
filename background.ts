@@ -4,36 +4,20 @@ import bs58 from "bs58";
 import { createPaymentHeader } from "x402/client";
 import { svm, decodeXPaymentResponse } from "x402/shared";
 import type { PaymentRequirements } from "x402/types";
+import {
+  generateKeypair,
+  encryptPrivateKey,
+  decryptPrivateKey,
+} from "./wallet";
 
 const SOLSCAN_HOST = "solscan.io";
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3001";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://vizor-api.vercel.app";
 const RPC_URL = import.meta.env.VITE_SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
 
-// Load Solana wallet from private key
-const PRIVATE_KEY = import.meta.env.VITE_SOLANA_PRIVATE_KEY;
-
-let wallet: Keypair | null = null;
-let signer: any = null;
-let connection: Connection | null = null;
-
-// Initialize wallet and signer
-(async () => {
-  if (PRIVATE_KEY) {
-    try {
-      const keyArray = JSON.parse(PRIVATE_KEY);
-      wallet = Keypair.fromSecretKey(new Uint8Array(keyArray));
-      connection = new Connection(RPC_URL, "confirmed");
-      
-      // Create proper signer using x402 SDK
-      const privateKeyBase58 = bs58.encode(wallet.secretKey);
-      signer = await svm.createSignerFromBase58(privateKeyBase58);
-      
-      console.log("[vizor] Wallet loaded:", wallet.publicKey.toBase58());
-    } catch (error) {
-      console.error("[vizor] Failed to load wallet:", error);
-    }
-  }
-})();
+// Wallet state
+let unlockedWallet: Keypair | null = null;
+let unlockedSigner: any = null;
+const connection = new Connection(RPC_URL, "confirmed");
 
 function notify(tabId: number, url?: string) {
   // Content script may not be injected on every page; ignore failures.
@@ -97,11 +81,11 @@ async function fetchWithPayment(url: string, options: RequestInit = {}): Promise
   
   // If 402 Payment Required, handle it
   if (response.status === 402) {
-    console.log("[vizor] Got 402, signer available:", !!signer, "connection available:", !!connection);
+    console.log("[vizor] Got 402, wallet unlocked:", !!unlockedSigner);
     
-    if (!signer || !connection) {
-      console.error("[vizor] Wallet not initialized yet. Please wait for wallet to load.");
-      return response;
+    if (!unlockedSigner) {
+      console.error("[vizor] Wallet locked. Please unlock your wallet first.");
+      throw new Error("Wallet locked. Please unlock your wallet to continue.");
     }
     
     try {
@@ -117,10 +101,13 @@ async function fetchWithPayment(url: string, options: RequestInit = {}): Promise
       const paymentOption = paymentReq.accepts[0];
       console.log("[vizor] Selected payment option:", JSON.stringify(paymentOption, null, 2));
       
+      // Note: Network fees are covered by the facilitator, user only needs USDC
+      console.log("[vizor] Creating payment (network fees covered by facilitator)...");
+      
       // Create payment header using x402 SDK
       console.log("[vizor] Creating payment header...");
       const paymentHeader = await createPaymentHeader(
-        signer,
+        unlockedSigner,
         1, // x402Version
         paymentOption as PaymentRequirements,
         {
@@ -141,9 +128,18 @@ async function fetchWithPayment(url: string, options: RequestInit = {}): Promise
         },
       });
       console.log("[vizor] Retry response status:", response.status);
-    } catch (error) {
+    } catch (error: any) {
       console.error("[vizor] Payment failed:", error);
-      // Return error response instead of consumed 402
+      
+      // Provide user-friendly error messages
+      if (error.message?.includes("Insufficient funds") || error.message?.includes("insufficient")) {
+        throw new Error("⚠️ Insufficient USDC. You need at least 0.01 USDC. Click the extension icon to see your address and add USDC.");
+      }
+      
+      if (error.message?.includes("simulation failed")) {
+        throw new Error("⚠️ Payment failed. Please ensure you have at least 0.01 USDC in your wallet.");
+      }
+      
       throw error;
     }
   }
@@ -151,7 +147,147 @@ async function fetchWithPayment(url: string, options: RequestInit = {}): Promise
   return response;
 }
 
+// Wallet Management Handlers
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  // Check wallet status
+  if (msg?.type === "CHECK_WALLET_STATUS") {
+    (async () => {
+      const { encryptedWallet } = await chrome.storage.local.get(["encryptedWallet"]);
+      console.log("[vizor] Wallet status check - hasWallet:", !!encryptedWallet, "isUnlocked:", !!unlockedWallet);
+      sendResponse({
+        hasWallet: !!encryptedWallet,
+        isUnlocked: !!unlockedWallet,
+      });
+    })();
+    return true;
+  }
+
+  // Clear wallet (for debugging/recovery)
+  if (msg?.type === "CLEAR_WALLET") {
+    (async () => {
+      await chrome.storage.local.remove(["encryptedWallet"]);
+      unlockedWallet = null;
+      unlockedSigner = null;
+      console.log("[vizor] Wallet data cleared");
+      sendResponse({ ok: true });
+    })();
+    return true;
+  }
+
+  // Create wallet
+  if (msg?.type === "CREATE_WALLET") {
+    (async () => {
+      try {
+        const keypair = generateKeypair();
+        const encrypted = await encryptPrivateKey(keypair.secretKey, msg.password);
+
+        await chrome.storage.local.set({ encryptedWallet: encrypted });
+
+        // Auto-unlock after creation
+        unlockedWallet = keypair;
+        unlockedSigner = await svm.createSignerFromBase58(
+          bs58.encode(keypair.secretKey)
+        );
+
+        console.log("[vizor] Wallet created:", keypair.publicKey.toBase58());
+        sendResponse({ ok: true });
+      } catch (error: any) {
+        console.error("[vizor] Wallet creation failed:", error);
+        sendResponse({ ok: false, error: error.message });
+      }
+    })();
+    return true;
+  }
+
+  // Unlock wallet
+  if (msg?.type === "UNLOCK_WALLET") {
+    (async () => {
+      try {
+        const { encryptedWallet } = await chrome.storage.local.get(["encryptedWallet"]);
+
+        if (!encryptedWallet) {
+          console.log("[vizor] No encrypted wallet found in storage");
+          sendResponse({ ok: false, error: "No wallet found" });
+          return;
+        }
+
+        console.log("[vizor] Attempting to decrypt wallet...");
+        const decrypted = await decryptPrivateKey(encryptedWallet, msg.password);
+
+        if (!decrypted) {
+          console.log("[vizor] Decryption returned null (incorrect password)");
+          sendResponse({ ok: false, error: "Incorrect password" });
+          return;
+        }
+
+        console.log("[vizor] Wallet decrypted successfully, creating keypair...");
+        unlockedWallet = Keypair.fromSecretKey(decrypted);
+        
+        console.log("[vizor] Creating signer...");
+        unlockedSigner = await svm.createSignerFromBase58(bs58.encode(decrypted));
+
+        console.log("[vizor] Wallet unlocked:", unlockedWallet.publicKey.toBase58());
+        sendResponse({ ok: true });
+      } catch (error: any) {
+        console.error("[vizor] Unlock failed with exception:", error.message || error);
+        sendResponse({ ok: false, error: error.message || "Failed to unlock wallet" });
+      }
+    })();
+    return true;
+  }
+
+  // Lock wallet
+  if (msg?.type === "LOCK_WALLET") {
+    unlockedWallet = null;
+    unlockedSigner = null;
+    console.log("[vizor] Wallet locked");
+    sendResponse({ ok: true });
+    return true;
+  }
+
+  // Get wallet info
+  if (msg?.type === "GET_WALLET_INFO") {
+    if (!unlockedWallet) {
+      sendResponse({ ok: false, error: "Wallet locked" });
+      return true;
+    }
+
+    sendResponse({
+      ok: true,
+      address: unlockedWallet.publicKey.toBase58(),
+    });
+    return true;
+  }
+
+  // Export private key
+  if (msg?.type === "EXPORT_PRIVATE_KEY") {
+    (async () => {
+      try {
+        const { encryptedWallet } = await chrome.storage.local.get(["encryptedWallet"]);
+
+        if (!encryptedWallet) {
+          sendResponse({ ok: false, error: "No wallet found" });
+          return;
+        }
+
+        const decrypted = await decryptPrivateKey(encryptedWallet, msg.password);
+
+        if (!decrypted) {
+          sendResponse({ ok: false, error: "Incorrect password" });
+          return;
+        }
+
+        sendResponse({
+          ok: true,
+          privateKey: bs58.encode(decrypted),
+        });
+      } catch (error: any) {
+        sendResponse({ ok: false, error: error.message });
+      }
+    })();
+    return true;
+  }
+
   if (msg?.type === "EXPLAIN_TX") {
     (async () => {
       try {
